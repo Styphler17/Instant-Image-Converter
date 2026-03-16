@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instant Image Converter – Convert PNG, JPG, WEBP, AVIF in Your Browser</title>
+    <meta name="description" content="Convert images between PNG, JPG, WEBP, AVIF and more. Runs 100% in your browser – your images never leave your device." />
+    <meta name="theme-color" content="#4F46E5" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-512.png" />
+
+    <meta property="og:title" content="Instant Image Converter" />
+    <meta property="og:description" content="Convert images between popular formats, right in your browser. 100% private." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Instant Image Converter",
+      "description": "Convert images between PNG, JPG, WEBP, AVIF and more. 100% client-side.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0" }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
