@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { Download, X, Share, Coffee, Heart, CreditCard, Cloud, ExternalLink, Sparkles, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Header */}
       <header className="sticky top-0 z-40 w-full glass border-b border-border/40 backdrop-blur-xl">
         <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
             <div className="relative group">
               <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-primary/50 to-blue-500/50 opacity-0 blur group-hover:opacity-100 transition duration-500"></div>
               <img src="/icons/icon-192.png" alt="" className="relative h-9 w-9 rounded-lg shadow-sm" aria-hidden="true" />
@@ -79,7 +80,7 @@ export function AppShell({ children }: AppShellProps) {
                 Private · Browser-based · High Speed
               </p>
             </div>
-          </div>
+          </Link>
           
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -227,12 +228,12 @@ export function AppShell({ children }: AppShellProps) {
               </div>
               
               <div className="flex items-center gap-6">
-                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary transition-colors">
+                <Link to="/privacy" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary transition-colors">
                   Privacy Policy
-                </a>
-                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary transition-colors">
+                </Link>
+                <Link to="/terms" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </div>
             </div>
             
