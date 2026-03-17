@@ -1,3 +1,5 @@
+import heic2any from "heic2any";
+
 /**
  * Core image conversion engine.
  * Uses Canvas API for encoding/decoding.
@@ -101,22 +103,39 @@ export async function detectSupportedFormats(): Promise<OutputFormat[]> {
 }
 
 export function loadImage(file: File): Promise<ImageInfo> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (file.size > 30 * 1024 * 1024) {
       reject(new Error("File too large. Maximum size is 30 MB."));
       return;
     }
 
-    const url = URL.createObjectURL(file);
+    let targetFile = file;
+    const isHEIC = file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif") || file.type === "image/heic" || file.type === "image/heif";
+
+    if (isHEIC) {
+      try {
+        const converted = await heic2any({
+          blob: file,
+          toType: "image/png",
+        });
+        const blob = Array.isArray(converted) ? converted[0] : converted;
+        targetFile = new File([blob], file.name.replace(/\.(heic|heif)$/i, ".png"), { type: "image/png" });
+      } catch (e) {
+        reject(new Error("Failed to process HEIC file."));
+        return;
+      }
+    }
+
+    const url = URL.createObjectURL(targetFile);
     const img = new Image();
 
     img.onload = () => {
       resolve({
-        file,
+        file: targetFile,
         url,
         width: img.naturalWidth,
         height: img.naturalHeight,
-        format: file.type || guessFormat(file.name),
+        format: targetFile.type || guessFormat(targetFile.name),
       });
     };
 
@@ -287,13 +306,14 @@ export function formatBytes(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-export const ACCEPTED_INPUT_TYPES = "image/jpeg,image/png,image/webp,image/avif,image/gif,image/bmp,image/tiff,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif";
+export const ACCEPTED_INPUT_TYPES = "image/jpeg,image/png,image/webp,image/avif,image/gif,image/bmp,image/tiff,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif,.heic,.heif";
 
 export function formatName(mime: string): string {
   const map: Record<string, string> = {
     "image/jpeg": "JPEG", "image/png": "PNG", "image/webp": "WebP",
     "image/avif": "AVIF", "image/gif": "GIF", "image/bmp": "BMP",
-    "image/tiff": "TIFF", "image/unknown": "Unknown",
+    "image/tiff": "TIFF", "image/heic": "HEIC", "image/heif": "HEIF",
+    "image/unknown": "Unknown",
   };
   return map[mime] || mime.replace("image/", "").toUpperCase();
 }

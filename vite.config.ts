@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["icons/icon-192.png", "icons/icon-512.png", "favicon.ico"],
       manifest: false, // We use our own manifest.webmanifest in public/
       workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,wasm}"],
         runtimeCaching: [
           {

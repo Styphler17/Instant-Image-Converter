@@ -6,6 +6,7 @@ import { ConvertControls } from "@/components/ConvertControls";
 import { ProgressOverlay } from "@/components/ProgressOverlay";
 import { ResizeControls } from "@/components/ResizeControls";
 import { AdvancedOptions } from "@/components/AdvancedOptions";
+import { FeaturesGrid } from "@/components/FeaturesGrid";
 import { BatchThumbnails } from "@/components/BatchThumbnails";
 import { useImageConversion } from "@/hooks/useImageConversion";
 import { useCodecSupport } from "@/hooks/useCodecSupport";
@@ -13,7 +14,7 @@ import { getOutputFilename } from "@/lib/image-converter";
 import { downloadAsZip, downloadAsPDF } from "@/lib/download-utils";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { Shield, Download, FileArchive, FileText, Loader2 } from "lucide-react";
+import { Shield, Download, FileArchive, FileText, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -108,26 +109,30 @@ const Index = () => {
 
       <div className="container max-w-6xl py-12 sm:py-20">
         {isIdle ? (
-          <div className="mx-auto max-w-2xl space-y-10 animate-pop-in">
-            <div className="text-center space-y-4">
+          <div className="mx-auto max-w-4xl space-y-16 animate-pop-in">
+            <div className="text-center space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
-                <Shield className="h-3 w-3" />
-                Browser Native · Privacy First
+                <Sparkles className="h-3 w-3" />
+                Unlimited Batch · No Uploads · 100% Secure
               </div>
-              <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl">
-                <span className="text-gradient">Convert instantly,</span>
+              <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-7xl leading-tight">
+                <span className="text-gradient">Unlimited Image Converter</span>
                 <br />
-                <span className="opacity-80">anywhere.</span>
+                <span className="opacity-80">No Uploads. No Fees.</span>
               </h2>
-              <p className="text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
-                Professional-grade image conversion that runs 100% in your browser. No uploads, no waiting, just speed.
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
+                The fastest way to convert HEIC, PNG, JPG, WebP, and AVIF. Everything stays in your browser for total privacy and instant local speed.
               </p>
             </div>
 
-            <UploadArea onFiles={handleFiles} multiple />
+            <div className="max-w-2xl mx-auto">
+              <UploadArea onFiles={handleFiles} multiple />
+            </div>
 
-            <div className="flex flex-col items-center justify-center gap-4 text-xs font-medium text-muted-foreground/60 italic">
-              <p>Supports PNG, JPG, WebP, AVIF, GIF, BMP, and TIFF</p>
+            <FeaturesGrid />
+
+            <div className="flex flex-col items-center justify-center gap-4 text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.3em]">
+              <p>Supports Batch HEIC to WebP · JPG to PNG · AVIF Export</p>
             </div>
           </div>
         ) : (
