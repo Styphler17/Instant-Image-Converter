@@ -215,12 +215,30 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
 
-          <div className="space-y-4 pt-8 border-t border-border/20">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
-              100% Private · No Server Uploads
-            </p>
-            <p className="text-xs text-muted-foreground leading-relaxed italic opacity-80">
-              Your data safety is our priority. All processing happens locally in your browser.
+          <div className="space-y-6 pt-8 border-t border-border/20">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="text-left space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                  © {new Date().getFullYear()} CreativeUtil. All rights reserved.
+                </p>
+                <p className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-widest">
+                  100% Private · No Server Uploads
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-6">
+                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary transition-colors">
+                  Privacy Policy
+                </a>
+                <a href="#" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-primary transition-colors">
+                  Terms of Service
+                </a>
+              </div>
+            </div>
+            
+            <p className="text-xs text-muted-foreground leading-relaxed italic opacity-80 max-w-lg mx-auto">
+              Your data safety is our priority. All processing happens locally in your browser. 
+              We never see, store, or transmit your images.
             </p>
           </div>
         </div>
