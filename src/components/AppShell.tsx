@@ -94,11 +94,11 @@ export function AppShell({ children }: AppShellProps) {
                 <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-primary/50 to-blue-500/50 opacity-0 blur group-hover:opacity-100 transition duration-500"></div>
                 <img src="/icons/icon-192.png" alt="" className="relative h-9 w-9 rounded-lg shadow-sm" aria-hidden="true" />
               </div>
-              <div className="flex flex-col">
+              <div className="hidden sm:flex flex-col">
                 <h1 className="text-lg font-bold tracking-tight leading-none text-foreground">
                   <span className="text-gradient">Instant Image Converter</span>
                 </h1>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80 hidden sm:block mt-1">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80 mt-1">
                   Private · Browser-based · High Speed
                 </p>
               </div>
