@@ -108,8 +108,45 @@ const Index = () => {
     }
   };
 
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to convert images with Instant Image Converter",
+    "description": "Learn how to convert HEIC, JPG, PNG, and WebP images in bulk without uploading them to any server.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Upload Images",
+        "text": "Drag and drop your images or folders into the dropzone, or click to select files from your device.",
+        "url": "https://image-converter.creativeutil.com/#upload"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Select Output Format",
+        "text": "Choose your desired output format (PNG, JPG, WebP, AVIF) and adjust the quality settings.",
+        "url": "https://image-converter.creativeutil.com/#settings"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Convert and Download",
+        "text": "Click 'Start Conversion' to process your images locally. Once done, download your optimized files individually or as a ZIP archive.",
+        "url": "https://image-converter.creativeutil.com/#convert"
+      }
+    ],
+    "totalTime": "PT1M",
+    "estimatedCost": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": "0"
+    }
+  };
+
   return (
     <AppShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
       <ProgressOverlay 
         visible={state === "converting" || state === "loading"} 
         message={state === "loading" ? "Analyzing Images..." : "Optimizing Batch..."}
