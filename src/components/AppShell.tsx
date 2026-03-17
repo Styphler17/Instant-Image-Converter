@@ -119,7 +119,7 @@ export function AppShell({ children }: AppShellProps) {
                 <Sparkles className="h-3 w-3" />
                 Next Steps
               </div>
-              <h4 className="text-lg font-bold">Enhance your workflow</h4>
+              <h4 className="text-responsive-h2 font-bold tracking-tight">Enhance your workflow</h4>
               <p className="text-xs text-muted-foreground">Store your converted images securely in the cloud</p>
             </div>
             

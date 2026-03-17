@@ -129,10 +129,10 @@ export function UploadArea({ onFiles, multiple = true }: UploadAreaProps) {
         </div>
 
         <div className="text-center relative z-10 drop-text">
-          <h3 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+          <h3 className="text-responsive-h2 font-black tracking-tight text-foreground">
             {dragActive ? "Release to start" : "Drop your workspace"}
           </h3>
-          <p className="mt-3 text-sm font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+          <p className="mt-3 text-responsive-sm font-bold text-muted-foreground uppercase tracking-widest opacity-60">
             Files or entire folders
           </p>
         </div>

@@ -149,6 +149,26 @@
     @apply text-primary font-bold;
   }
 
+  /* Responsive Typography Utilities */
+  .text-responsive-h1 {
+    font-size: clamp(2.25rem, 8vw, 4.5rem);
+    line-height: 1.1;
+  }
+
+  .text-responsive-h2 {
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+    line-height: 1.2;
+  }
+
+  .text-responsive-p {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    line-height: 1.6;
+  }
+
+  .text-responsive-sm {
+    font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  }
+
   @keyframes radiation {
     0% {
       transform: scale(0.5);

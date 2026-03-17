@@ -54,8 +54,8 @@ export function FeaturesGrid() {
             <feature.icon className={`h-6 w-6 ${feature.color}`} />
           </div>
           <div className="space-y-2">
-            <h3 className="font-bold text-base">{feature.title}</h3>
-            <p className="text-xs leading-relaxed text-muted-foreground font-medium" dangerouslySetInnerHTML={{ __html: feature.description }}>
+            <h3 className="font-bold text-responsive-sm uppercase tracking-tight">{feature.title}</h3>
+            <p className="text-[11px] sm:text-xs leading-relaxed text-muted-foreground font-medium" dangerouslySetInnerHTML={{ __html: feature.description }}>
             </p>
           </div>
         </div>

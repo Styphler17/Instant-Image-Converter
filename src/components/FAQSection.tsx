@@ -87,7 +87,7 @@ export function FAQSection() {
           <HelpCircle className="h-3 w-3" />
           Everything you need to know
         </div>
-        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl text-gradient">Frequently Asked Questions</h2>
+        <h2 className="text-responsive-h2 font-extrabold tracking-tight text-gradient">Frequently Asked Questions</h2>
         <p className="text-muted-foreground font-medium max-w-lg">Transparent answers about privacy, speed, and limits.</p>
       </div>
 
@@ -99,11 +99,11 @@ export function FAQSection() {
               value={`item-${i}`}
               className="glass-card rounded-2xl px-6 border-none overflow-hidden"
             >
-              <AccordionTrigger className="text-base font-bold text-foreground hover:text-primary transition-colors hover:no-underline py-6">
+              <AccordionTrigger className="text-responsive-sm sm:text-base font-bold text-foreground hover:text-primary transition-colors hover:no-underline py-6 text-left">
                 {faq.q}
               </AccordionTrigger>
               <AccordionContent 
-                className="text-sm text-muted-foreground leading-relaxed font-medium"
+                className="text-[11px] sm:text-sm text-muted-foreground leading-relaxed font-medium"
               >
                 <div 
                   dangerouslySetInnerHTML={{ 

@@ -1,8 +1,3 @@
-import * as CT from "colorthief";
-
-// Handle module resolution differences between dev and prod builds
-const ColorThief = (CT as any).default || CT;
-
 export interface ColorPalette {
   dominant: string;
   palette: string[];
@@ -16,6 +11,17 @@ function rgbToHex(r: number, g: number, b: number): string {
 }
 
 export async function extractColors(imageUrl: string): Promise<ColorPalette> {
+  // @ts-ignore
+  let CT;
+  try {
+    CT = await import("colorthief");
+  } catch (e) {
+    console.error("Failed to load colorthief", e);
+    return { dominant: "#cccccc", palette: [] };
+  }
+  
+  const ColorThief = CT.default || CT;
+  
   return new Promise((resolve, reject) => {
     const img = new Image();
     const colorThief = new ColorThief();

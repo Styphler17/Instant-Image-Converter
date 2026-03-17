@@ -1,7 +1,7 @@
 import heic2any from "heic2any";
 import imageCompression from "browser-image-compression";
 import UTIF from "utif";
-import * as AgPsd from "ag-psd";
+import { readPsd, drawPsd } from "ag-psd";
 
 /**
  * Truly Universal Image Conversion Engine
@@ -128,7 +128,6 @@ export function loadImage(file: File): Promise<ImageInfo> {
     let originalFormatLabel = "";
     
     try {
-      // 1. Specialized Decoding Blocks
       if (["heic", "heif"].includes(extension) || file.type.includes("heic")) {
         const converted = await heic2any({ blob: file, toType: "image/png" });
         const blob = Array.isArray(converted) ? converted[0] : converted;
@@ -136,8 +135,9 @@ export function loadImage(file: File): Promise<ImageInfo> {
         originalFormatLabel = "HEIC";
       } else if (extension === "psd" || file.type.includes("photoshop")) {
         const buffer = await file.arrayBuffer();
-        const psd = AgPsd.readPsd(buffer);
-        const canvas = AgPsd.drawPsd(psd);
+        const psd = readPsd(buffer);
+        const canvas = psd.canvas;
+        if (!canvas) throw new Error("Failed to render PSD canvas.");
         const blob = await new Promise<Blob>((res) => canvas.toBlob(b => res(b!), "image/png"));
         targetFile = blob;
         originalFormatLabel = "PSD";
@@ -175,10 +175,10 @@ export function loadImage(file: File): Promise<ImageInfo> {
         if (foundJpegs.length > 0) {
           targetFile = new Blob([bytes.slice(foundJpegs[0].start, foundJpegs[0].end)], { type: "image/jpeg" });
           originalFormatLabel = extension.toUpperCase();
-        } else throw new Error("No usable preview found.");
+        } else throw new Error("No preview found.");
       }
     } catch (e) {
-      console.warn("Specialized decoding failed, trying native load:", e);
+      console.warn("Specialized decoding failed:", e);
     }
 
     const url = URL.createObjectURL(targetFile);
@@ -186,7 +186,7 @@ export function loadImage(file: File): Promise<ImageInfo> {
     
     img.onload = () => {
       const info: ImageInfo = {
-        file: file, // Keep original file for metadata/saving
+        file: file,
         url,
         width: img.naturalWidth,
         height: img.naturalHeight,
@@ -278,7 +278,7 @@ export function formatBytes(bytes: number): string {
 export const ACCEPTED_INPUT_TYPES = "image/*,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif,.heic,.heif,.ico,.jfif,.psd,.tga,.nef,.raw,.arw,.cr2,.dng,.cr3";
 
 export function formatName(mime: string): string {
-  const map: Record<string, string> = { "image/jpeg": "JPEG", "image/png": "PNG", "image/webp": "WebP", "image/avif": "AVIF", "image/gif": "GIF", "image/bmp": "BMP", "image/tiff": "TIFF", "image/heic": "HEIC", "image/heif": "HEIF", "image/x-icon": "ICO", "image/vnd.adobe.photoshop": "PSD", "image/x-tga": "TGA" };
+  const map: Record<string, string> = { "image/jpeg": "JPEG", "image/png": "PNG", "image/webp": "WebP", "image/avif": "AVIF", "image/gif": "GIF", "image/bmp": "BMP", "image/tiff": "TIFF", "image/heic": "HEIC", "image/heif": "HEIF", "image/x-icon": "ICO", "image/vnd.adobe.photoshop": "PSD" };
   return map[mime] || mime.replace("image/", "").toUpperCase();
 }
 

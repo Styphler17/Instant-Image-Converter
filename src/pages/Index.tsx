@@ -123,12 +123,12 @@ const Index = () => {
                 <Sparkles className="h-3 w-3" />
                 <span className="keyword-blue">Unlimited Batch</span> · <span className="keyword-green">No Uploads</span> · <span className="keyword-purple">100% Secure</span>
               </div>
-              <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-7xl leading-tight">
+              <h2 className="text-responsive-h1 font-extrabold tracking-tight text-foreground leading-tight">
                 <span className="text-gradient">Unlimited Image Converter</span>
                 <br />
                 <span className="opacity-80"><span className="keyword-green">No Uploads</span>. <span className="keyword-orange">No Fees</span>.</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
+              <p className="text-responsive-p text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
                 The fastest way to convert <span className="keyword-blue">HEIC</span>, <span className="keyword-primary">PNG</span>, <span className="keyword-orange">JPG</span>, <span className="keyword-green">WebP</span>, and <span className="keyword-purple">AVIF</span>. Everything stays in your browser for <span className="keyword-primary">total privacy</span> and <span className="keyword-blue">instant local speed</span>.
               </p>
               <div className="pt-2">
