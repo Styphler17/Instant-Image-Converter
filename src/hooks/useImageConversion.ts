@@ -5,7 +5,11 @@ import {
   type ConversionResult,
   type ConversionOptions,
   type ResizeOptions,
+  type EnhancementOptions,
+  type WatermarkOptions,
   DEFAULT_RESIZE_OPTIONS,
+  DEFAULT_ENHANCEMENT_OPTIONS,
+  DEFAULT_WATERMARK_OPTIONS,
   loadImage,
   convertImage,
 } from "@/lib/image-converter";
@@ -24,11 +28,17 @@ export function useImageConversion() {
   const [items, setItems] = useState<BatchItem[]>([]);
   const [globalState, setGlobalState] = useState<ConversionState>("idle");
   const [error, setError] = useState<string | null>(null);
+  
+  // Conversion Settings
   const [outputFormat, setOutputFormat] = useState<OutputFormat>("image/png");
   const [quality, setQuality] = useState(0.85);
   const [resize, setResize] = useState<ResizeOptions>(DEFAULT_RESIZE_OPTIONS);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [enhancements, setEnhancements] = useState<EnhancementOptions>(DEFAULT_ENHANCEMENT_OPTIONS);
+  const [watermark, setWatermark] = useState<WatermarkOptions>(DEFAULT_WATERMARK_OPTIONS);
+  const [removeExif, setRemoveExif] = useState(true);
+  const [batchPrefix, setBatchPrefix] = useState("");
 
+  const [activeIndex, setActiveIndex] = useState(0);
   const resultUrls = useRef<string[]>([]);
 
   const cleanupUrls = useCallback(() => {
@@ -66,7 +76,6 @@ export function useImageConversion() {
       setItems(loaded);
       setActiveIndex(0);
 
-      // Initialize resize with first image dimensions
       const firstValid = loaded.find((i) => i.state === "ready");
       if (firstValid) {
         setResize({
@@ -89,7 +98,14 @@ export function useImageConversion() {
     setError(null);
     cleanupUrls();
 
-    const options: ConversionOptions = { outputFormat, quality, resize };
+    const options: ConversionOptions = { 
+      outputFormat, 
+      quality, 
+      resize,
+      enhancements,
+      watermark,
+      removeExif 
+    };
     const updated = [...items];
 
     for (let i = 0; i < updated.length; i++) {
@@ -114,7 +130,7 @@ export function useImageConversion() {
 
     const allDone = updated.every((item) => item.state === "done" || item.state === "error");
     setGlobalState(allDone ? "done" : "error");
-  }, [items, outputFormat, quality, resize, cleanupUrls]);
+  }, [items, outputFormat, quality, resize, enhancements, watermark, removeExif, cleanupUrls]);
 
   const reset = useCallback(() => {
     items.forEach((item) => {
@@ -126,9 +142,11 @@ export function useImageConversion() {
     setGlobalState("idle");
     setActiveIndex(0);
     setResize(DEFAULT_RESIZE_OPTIONS);
+    setEnhancements(DEFAULT_ENHANCEMENT_OPTIONS);
+    setWatermark(DEFAULT_WATERMARK_OPTIONS);
+    setBatchPrefix("");
   }, [items, cleanupUrls]);
 
-  // Convenience accessors for active item
   const activeItem = items[activeIndex] || null;
   const imageInfo = activeItem?.imageInfo || null;
   const result = activeItem?.result || null;
@@ -147,6 +165,14 @@ export function useImageConversion() {
     setQuality,
     resize,
     setResize,
+    enhancements,
+    setEnhancements,
+    watermark,
+    setWatermark,
+    removeExif,
+    setRemoveExif,
+    batchPrefix,
+    setBatchPrefix,
     handleFiles,
     convert,
     reset,

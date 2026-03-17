@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type ImageInfo, type ConversionResult, formatBytes, formatName } from "@/lib/image-converter";
-import { ArrowRight, TrendingDown, TrendingUp, Clock, SlidersHorizontal, LayoutGrid } from "lucide-react";
+import { ArrowRight, TrendingDown, TrendingUp, Clock, SlidersHorizontal, LayoutGrid, Palette } from "lucide-react";
 import { ComparisonSlider } from "@/components/ComparisonSlider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { extractColors, type ColorPalette } from "@/lib/color-utils";
 
 interface PreviewPaneProps {
   imageInfo: ImageInfo;
@@ -12,9 +13,17 @@ interface PreviewPaneProps {
 
 export function PreviewPane({ imageInfo, result }: PreviewPaneProps) {
   const [viewMode, setViewMode] = useState<"sideBySide" | "comparison">("sideBySide");
+  const [colors, setColors] = useState<ColorPalette | null>(null);
+
   const sizeChange = result
     ? ((result.convertedSize - result.originalSize) / result.originalSize) * 100
     : null;
+
+  useEffect(() => {
+    extractColors(imageInfo.url)
+      .then(setColors)
+      .catch(() => setColors(null));
+  }, [imageInfo.url]);
 
   return (
     <div className="space-y-6">
@@ -97,45 +106,75 @@ export function PreviewPane({ imageInfo, result }: PreviewPaneProps) {
         </div>
       )}
 
-      {/* Stats bar */}
-      {result && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 animate-pop-in shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "p-2 rounded-xl shadow-sm",
-              sizeChange !== null && sizeChange < 0 ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
-            )}>
-               {sizeChange !== null && sizeChange < 0 ? (
-                 <TrendingDown className="h-5 w-5" />
-               ) : (
-                 <TrendingUp className="h-5 w-5" />
-               )}
-            </div>
-            <div>
-               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Optimization</p>
-               <p className={cn("text-base font-bold", sizeChange !== null && sizeChange < 0 ? "text-success" : "text-foreground")}>
-                 {sizeChange !== null
-                   ? sizeChange < 0
-                     ? `${Math.abs(sizeChange).toFixed(1)}% Reduction`
-                     : `${sizeChange.toFixed(1)}% Larger`
-                   : ""}
-               </p>
-            </div>
+      {/* Stats and Colors */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Extracted Colors */}
+        {colors && (
+          <div className="flex items-center gap-3 rounded-2xl border border-border/40 bg-card p-4 animate-pop-in shadow-sm">
+             <div className="p-2 rounded-xl bg-muted/50">
+               <Palette className="h-5 w-5 text-muted-foreground" />
+             </div>
+             <div className="flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">Color Palette</p>
+                <div className="flex gap-1.5 h-6">
+                  <div 
+                    className="flex-1 rounded-md shadow-sm border border-black/5" 
+                    style={{ backgroundColor: colors.dominant }} 
+                    title={colors.dominant} 
+                  />
+                  {colors.palette.map((c, i) => (
+                    <div 
+                      key={i} 
+                      className="w-6 rounded-md shadow-sm border border-black/5 hover:scale-110 transition-transform" 
+                      style={{ backgroundColor: c }} 
+                      title={c} 
+                    />
+                  ))}
+                </div>
+             </div>
           </div>
+        )}
 
-          <div className="flex items-center gap-4 bg-background/50 px-4 py-2 rounded-xl border border-border/40">
-            <div className="text-right">
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">Before</p>
-              <p className="text-sm font-bold opacity-60">{formatBytes(imageInfo.file.size)}</p>
+        {/* Stats bar */}
+        {result && (
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 animate-pop-in shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "p-2 rounded-xl shadow-sm",
+                sizeChange !== null && sizeChange < 0 ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+              )}>
+                 {sizeChange !== null && sizeChange < 0 ? (
+                   <TrendingDown className="h-5 w-5" />
+                 ) : (
+                   <TrendingUp className="h-5 w-5" />
+                 )}
+              </div>
+              <div>
+                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Optimization</p>
+                 <p className={cn("text-base font-bold", sizeChange !== null && sizeChange < 0 ? "text-success" : "text-foreground")}>
+                   {sizeChange !== null
+                     ? sizeChange < 0
+                       ? `${Math.abs(sizeChange).toFixed(1)}% Reduction`
+                       : `${sizeChange.toFixed(1)}% Larger`
+                     : ""}
+                 </p>
+              </div>
             </div>
-            <ArrowRight className="h-4 w-4 text-primary animate-pulse" />
-            <div>
-              <p className="text-[10px] font-bold text-primary uppercase">After</p>
-              <p className="text-sm font-bold text-primary">{formatBytes(result.convertedSize)}</p>
+
+            <div className="flex items-center gap-4 bg-background/50 px-4 py-2 rounded-xl border border-border/40">
+              <div className="text-right">
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">Before</p>
+                <p className="text-sm font-bold opacity-60">{formatBytes(imageInfo.file.size)}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-primary animate-pulse" />
+              <div>
+                <p className="text-[10px] font-bold text-primary uppercase">After</p>
+                <p className="text-sm font-bold text-primary">{formatBytes(result.convertedSize)}</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

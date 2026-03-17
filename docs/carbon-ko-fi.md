@@ -5,7 +5,7 @@
   1. Implement a "Support" UI (Monetization)
   We can add a subtle, premium-looking "Buy Me a Coffee" or "Support the Project" button in the footer or header. This is the   
   easiest way to start earning without changing your business model.
-   * Action: I can add a styled "Support" button that fits the new glassmorphism theme.
+   * Action: I can add a styled "Support" button that fits the new glassmorphism theme. buymeacoffee.com/stiffler17 / paypal.me/BraStyphler17
 
 
   2. Complete the PWA (Mobile Experience)

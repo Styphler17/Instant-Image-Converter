@@ -15,10 +15,26 @@ export interface ResizeOptions {
   lockAspectRatio: boolean;
 }
 
+export interface EnhancementOptions {
+  brightness: number; // 0-200, 100 is normal
+  contrast: number; // 0-200, 100 is normal
+  saturation: number; // 0-200, 100 is normal
+}
+
+export interface WatermarkOptions {
+  enabled: boolean;
+  text: string;
+  position: "bottom-right" | "bottom-left" | "top-right" | "top-left" | "center";
+  opacity: number; // 0-1
+}
+
 export interface ConversionOptions {
   outputFormat: OutputFormat;
   quality: number;
   resize: ResizeOptions;
+  enhancements?: EnhancementOptions;
+  watermark?: WatermarkOptions;
+  removeExif?: boolean; // Always true via canvas, but good to have in options
 }
 
 export interface ConversionResult {
@@ -51,9 +67,10 @@ export function getExtension(format: OutputFormat): string {
   return FORMAT_EXTENSIONS[format] || "bin";
 }
 
-export function getOutputFilename(originalName: string, format: OutputFormat): string {
+export function getOutputFilename(originalName: string, format: OutputFormat, prefix: string = ""): string {
   const base = originalName.replace(/\.[^.]+$/, "");
-  return `${base}.${getExtension(format)}`;
+  const name = prefix ? `${prefix}${base}` : base;
+  return `${name}.${getExtension(format)}`;
 }
 
 export async function detectSupportedFormats(): Promise<OutputFormat[]> {
@@ -122,7 +139,6 @@ function guessFormat(name: string): string {
   return map[ext || ""] || "image/unknown";
 }
 
-/** Compute final dimensions based on resize options */
 function computeDimensions(
   origW: number, origH: number, resize: ResizeOptions
 ): { width: number; height: number } {
@@ -170,12 +186,71 @@ export async function convertImage(
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas context unavailable.");
 
+  // Apply Enhancements
+  if (options.enhancements) {
+    const { brightness, contrast, saturation } = options.enhancements;
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+  }
+
   if (options.outputFormat === "image/jpeg") {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, width, height);
   }
 
+  // Drawing to canvas inherently strips EXIF metadata
   ctx.drawImage(img, 0, 0, width, height);
+
+  // Apply Watermark
+  if (options.watermark && options.watermark.enabled && options.watermark.text) {
+    ctx.filter = "none"; // Reset filter for watermark
+    ctx.globalAlpha = options.watermark.opacity;
+    ctx.fillStyle = "white";
+    
+    // Scale font size based on image width
+    const fontSize = Math.max(12, Math.floor(width * 0.05));
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textBaseline = "middle";
+    
+    const textMetrics = ctx.measureText(options.watermark.text);
+    const padding = fontSize;
+    
+    let x = 0;
+    let y = 0;
+
+    switch (options.watermark.position) {
+      case "bottom-right":
+        x = width - textMetrics.width - padding;
+        y = height - padding;
+        break;
+      case "bottom-left":
+        x = padding;
+        y = height - padding;
+        break;
+      case "top-right":
+        x = width - textMetrics.width - padding;
+        y = padding + fontSize / 2;
+        break;
+      case "top-left":
+        x = padding;
+        y = padding + fontSize / 2;
+        break;
+      case "center":
+        x = (width - textMetrics.width) / 2;
+        y = height / 2;
+        break;
+    }
+
+    // Add slight shadow for visibility
+    ctx.shadowColor = "rgba(0,0,0,0.8)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+
+    ctx.fillText(options.watermark.text, x, y);
+    
+    ctx.globalAlpha = 1.0;
+    ctx.shadowColor = "transparent";
+  }
 
   const quality = options.outputFormat === "image/png" ? undefined : options.quality;
 
@@ -229,4 +304,17 @@ export const DEFAULT_RESIZE_OPTIONS: ResizeOptions = {
   width: 0,
   height: 0,
   lockAspectRatio: true,
+};
+
+export const DEFAULT_ENHANCEMENT_OPTIONS: EnhancementOptions = {
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+};
+
+export const DEFAULT_WATERMARK_OPTIONS: WatermarkOptions = {
+  enabled: false,
+  text: "My Watermark",
+  position: "bottom-right",
+  opacity: 0.5,
 };

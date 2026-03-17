@@ -15,7 +15,7 @@
   Recommend services that users might need after they convert their images:
    * Stock Photos: "Need more images? Check out [Affiliate Link to Shutterstock/Adobe Stock]."
    * Design Tools: "Edit this converted image in [Affiliate Link to Canva/Figma]."
-   * Cloud Storage: "Store your converted batch in [Affiliate Link to Dropbox/pCloud]."
+   * Cloud Storage: "Store your converted batch in [Affiliate Link to Dropbox/pCloud]."https://www.dropbox.com/referrals/AAAKDAHnxdbluJHNHH6Fiy1d6jeHmtSmEXg?src=global9  / https://e.pcloud.com/#/register?invite=WHU2ZtSuKXy
    * Implementation: Add a "Next Steps" or "Recommended Tools" section in the footer or on the "Success" state after conversion.
 
 

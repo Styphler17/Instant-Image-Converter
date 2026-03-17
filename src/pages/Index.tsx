@@ -5,13 +5,15 @@ import { PreviewPane } from "@/components/PreviewPane";
 import { ConvertControls } from "@/components/ConvertControls";
 import { ProgressOverlay } from "@/components/ProgressOverlay";
 import { ResizeControls } from "@/components/ResizeControls";
+import { AdvancedOptions } from "@/components/AdvancedOptions";
 import { BatchThumbnails } from "@/components/BatchThumbnails";
 import { useImageConversion } from "@/hooks/useImageConversion";
 import { useCodecSupport } from "@/hooks/useCodecSupport";
 import { getOutputFilename } from "@/lib/image-converter";
+import { downloadAsZip, downloadAsPDF } from "@/lib/download-utils";
 import { toast } from "sonner";
-import { useEffect } from "react";
-import { Shield, Download } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Shield, Download, FileArchive, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -29,17 +31,27 @@ const Index = () => {
     setQuality,
     resize,
     setResize,
+    enhancements,
+    setEnhancements,
+    watermark,
+    setWatermark,
+    removeExif,
+    setRemoveExif,
+    batchPrefix,
+    setBatchPrefix,
     handleFiles,
     convert,
     reset,
   } = useImageConversion();
 
   const { supportedFormats } = useCodecSupport();
+  const [isZipping, setIsZipping] = useState(false);
+  const [isPdfing, setIsPdfing] = useState(false);
 
   useEffect(() => {
     if (state === "done") {
       const doneCount = items.filter((i) => i.state === "done").length;
-      toast.success(`Conversion complete. ${doneCount} file${doneCount > 1 ? "s" : ""} ready to download.`);
+      toast.success(`Conversion complete. ${doneCount} file${doneCount > 1 ? "s" : ""} ready.`);
     }
   }, [state, items]);
 
@@ -50,16 +62,44 @@ const Index = () => {
   const isIdle = state === "idle";
 
   const handleDownloadAll = () => {
-    items.forEach((item) => {
+    items.forEach((item, index) => {
       if (item.result) {
         const a = document.createElement("a");
         a.href = item.result.url;
-        a.download = getOutputFilename(item.imageInfo.file.name, item.result.format);
+        a.download = getOutputFilename(
+          item.imageInfo.file.name, 
+          item.result.format, 
+          batchPrefix ? `${batchPrefix}_${index + 1}_` : ""
+        );
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
       }
     });
+  };
+
+  const handleZip = async () => {
+    setIsZipping(true);
+    try {
+      await downloadAsZip(items, batchPrefix);
+      toast.success("ZIP archive created!");
+    } catch (e) {
+      toast.error("Failed to create ZIP");
+    } finally {
+      setIsZipping(false);
+    }
+  };
+
+  const handlePDF = async () => {
+    setIsPdfing(true);
+    try {
+      await downloadAsPDF(items);
+      toast.success("PDF document created!");
+    } catch (e) {
+      toast.error("Failed to create PDF");
+    } finally {
+      setIsPdfing(false);
+    }
   };
 
   return (
@@ -142,6 +182,19 @@ const Index = () => {
                         originalHeight={imageInfo.height}
                       />
                     </div>
+
+                    <div className="pt-6 border-t border-border/40">
+                      <AdvancedOptions
+                        enhancements={enhancements}
+                        setEnhancements={setEnhancements}
+                        watermark={watermark}
+                        setWatermark={setWatermark}
+                        removeExif={removeExif}
+                        setRemoveExif={setRemoveExif}
+                        batchPrefix={batchPrefix}
+                        setBatchPrefix={setBatchPrefix}
+                      />
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-3">
@@ -155,17 +208,43 @@ const Index = () => {
                       />
                     </div>
                     
-                    {/* Download All for batch */}
+                    {/* Pro Package Exports for batch */}
                     {state === "done" && items.length > 1 && items.some((i) => i.result) && (
-                      <Button
-                        onClick={handleDownloadAll}
-                        variant="default"
-                        size="lg"
-                        className="gap-2 w-full premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base font-bold"
-                      >
-                        <Download className="h-5 w-5" />
-                        Download All ({items.filter((i) => i.result).length} files)
-                      </Button>
+                      <div className="glass-card rounded-2xl p-4 bg-primary/5 border-primary/20 space-y-3 animate-pop-in">
+                        <div className="flex items-center gap-2 px-2 pb-2 border-b border-border/40">
+                           <Shield className="h-4 w-4 text-primary" />
+                           <h4 className="text-sm font-bold text-foreground">Pro Export Options</h4>
+                        </div>
+                        <Button
+                          onClick={handleDownloadAll}
+                          variant="default"
+                          size="lg"
+                          className="gap-2 w-full premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base font-bold"
+                        >
+                          <Download className="h-5 w-5" />
+                          Download Individual Files
+                        </Button>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            onClick={handleZip}
+                            disabled={isZipping}
+                            variant="outline"
+                            className="gap-2 border-border/60 hover:bg-muted/50 h-12 font-bold"
+                          >
+                            {isZipping ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileArchive className="h-4 w-4 text-blue-500" />}
+                            ZIP Archive
+                          </Button>
+                          <Button
+                            onClick={handlePDF}
+                            disabled={isPdfing}
+                            variant="outline"
+                            className="gap-2 border-border/60 hover:bg-muted/50 h-12 font-bold"
+                          >
+                            {isPdfing ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4 text-red-500" />}
+                            PDF Document
+                          </Button>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

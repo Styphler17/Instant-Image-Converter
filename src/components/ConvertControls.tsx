@@ -40,6 +40,7 @@ export function ConvertControls({
             <Download className="h-5 w-5" />
             Download Result
           </Button>
+          
           <div className="flex gap-2">
             <Button
               onClick={onConvert}
