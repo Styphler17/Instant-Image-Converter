@@ -7,6 +7,7 @@ import { ProgressOverlay } from "@/components/ProgressOverlay";
 import { ResizeControls } from "@/components/ResizeControls";
 import { AdvancedOptions } from "@/components/AdvancedOptions";
 import { FeaturesGrid } from "@/components/FeaturesGrid";
+import { FAQSection } from "@/components/FAQSection";
 import { BatchThumbnails } from "@/components/BatchThumbnails";
 import { useImageConversion } from "@/hooks/useImageConversion";
 import { useCodecSupport } from "@/hooks/useCodecSupport";
@@ -123,6 +124,15 @@ const Index = () => {
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
                 The fastest way to convert HEIC, PNG, JPG, WebP, and AVIF. Everything stays in your browser for total privacy and instant local speed.
               </p>
+              <div className="pt-2">
+                <a 
+                  href="#faq" 
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2 group"
+                >
+                  See all answers
+                  <span className="group-hover:translate-y-0.5 transition-transform">↓</span>
+                </a>
+              </div>
             </div>
 
             <div className="max-w-2xl mx-auto">
@@ -131,7 +141,9 @@ const Index = () => {
 
             <FeaturesGrid />
 
-            <div className="flex flex-col items-center justify-center gap-4 text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.3em]">
+            <FAQSection />
+
+            <div className="flex flex-col items-center justify-center gap-4 text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.3em] mt-12">
               <p>Supports Batch HEIC to WebP · JPG to PNG · AVIF Export</p>
             </div>
           </div>
