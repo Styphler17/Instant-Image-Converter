@@ -4,6 +4,7 @@ import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
 import { Download, X, Share, Coffee, Heart, CreditCard, Cloud, ExternalLink, Sparkles, ArrowUp, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
+import { AnimatedBorder } from "./ui/animated-border";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -141,17 +142,21 @@ export function AppShell({ children }: AppShellProps) {
       </main>
 
       {/* Back to top button */}
-      <Button
-        variant="secondary"
-        size="icon"
-        onClick={scrollToTop}
-        className={`fixed bottom-8 right-8 z-50 rounded-full h-12 w-12 shadow-lg transition-all duration-300 glass border-border/40 ${
-          showBackToTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
-        }`}
-        aria-label="Back to top"
-      >
-        <ArrowUp className="h-6 w-6" />
-      </Button>
+      <div className={`fixed bottom-8 right-8 z-50 transition-all duration-300 ${
+        showBackToTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
+      }`}>
+        <AnimatedBorder borderRadius={50}>
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={scrollToTop}
+            className="rounded-full h-12 w-12 shadow-lg glass border-border/40 hover:bg-primary/10 transition-colors"
+            aria-label="Back to top"
+          >
+            <ArrowUp className="h-6 w-6" />
+          </Button>
+        </AnimatedBorder>
+      </div>
 
       {/* Footer */}
       <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm px-4 py-16 text-center">
