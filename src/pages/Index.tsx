@@ -7,6 +7,7 @@ import { ProgressOverlay } from "@/components/ProgressOverlay";
 import { ResizeControls } from "@/components/ResizeControls";
 import { AdvancedOptions } from "@/components/AdvancedOptions";
 import { FeaturesGrid } from "@/components/FeaturesGrid";
+import { StatsSection } from "@/components/StatsSection";
 import { FAQSection } from "@/components/FAQSection";
 import { BatchThumbnails } from "@/components/BatchThumbnails";
 import { useImageConversion } from "@/hooks/useImageConversion";
@@ -184,6 +185,8 @@ const Index = () => {
             </div>
 
             <FeaturesGrid />
+
+            <StatsSection />
 
             <FAQSection />
 
