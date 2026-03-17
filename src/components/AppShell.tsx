@@ -1,9 +1,17 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
-import { Download, X, Share, Coffee, Heart, CreditCard, Cloud, ExternalLink, Sparkles, ArrowUp } from "lucide-react";
+import { Download, X, Share, Coffee, Heart, CreditCard, Cloud, ExternalLink, Sparkles, ArrowUp, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface AppShellProps {
   children: ReactNode;
@@ -12,6 +20,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const { showBanner, isIOS, promptInstall, dismiss } = usePWAInstallPrompt();
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +34,17 @@ export function AppShell({ children }: AppShellProps) {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const getPageTitle = (path: string) => {
+    switch (path) {
+      case "/privacy": return "Privacy Policy";
+      case "/terms": return "Terms of Service";
+      default: return "";
+    }
+  };
+
+  const isHome = location.pathname === "/";
+  const pageTitle = getPageTitle(location.pathname);
 
   return (
     <div className="flex min-h-screen flex-col bg-background selection:bg-primary/30">
@@ -67,20 +87,43 @@ export function AppShell({ children }: AppShellProps) {
       {/* Header */}
       <header className="sticky top-0 z-40 w-full glass border-b border-border/40 backdrop-blur-xl">
         <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer">
-            <div className="relative group">
-              <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-primary/50 to-blue-500/50 opacity-0 blur group-hover:opacity-100 transition duration-500"></div>
-              <img src="/icons/icon-192.png" alt="" className="relative h-9 w-9 rounded-lg shadow-sm" aria-hidden="true" />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-lg font-bold tracking-tight leading-none text-foreground">
-                <span className="text-gradient">Instant Image Converter</span>
-              </h1>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80 hidden sm:block mt-1">
-                Private · Browser-based · High Speed
-              </p>
-            </div>
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer shrink-0">
+              <div className="relative group">
+                <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-primary/50 to-blue-500/50 opacity-0 blur group-hover:opacity-100 transition duration-500"></div>
+                <img src="/icons/icon-192.png" alt="" className="relative h-9 w-9 rounded-lg shadow-sm" aria-hidden="true" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-lg font-bold tracking-tight leading-none text-foreground">
+                  <span className="text-gradient">Instant Image Converter</span>
+                </h1>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80 hidden sm:block mt-1">
+                  Private · Browser-based · High Speed
+                </p>
+              </div>
+            </Link>
+
+            {!isHome && (
+              <div className="hidden md:block">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link to="/" className="flex items-center gap-1">
+                          <Home className="h-3 w-3" />
+                          Home
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+            )}
+          </div>
           
           <div className="flex items-center gap-2">
             <ThemeToggle />
