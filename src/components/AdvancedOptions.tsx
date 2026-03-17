@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { type EnhancementOptions, type WatermarkOptions } from "@/lib/image-converter";
-import { Sliders, Droplet, Shield, Edit3 } from "lucide-react";
+import { Sliders, Droplet, Shield, Edit3, Sparkles } from "lucide-react";
 
 interface AdvancedOptionsProps {
   enhancements: EnhancementOptions;
@@ -14,6 +14,8 @@ interface AdvancedOptionsProps {
   setWatermark: (w: WatermarkOptions) => void;
   removeExif: boolean;
   setRemoveExif: (r: boolean) => void;
+  optimize: boolean;
+  setOptimize: (o: boolean) => void;
   batchPrefix: string;
   setBatchPrefix: (p: string) => void;
 }
@@ -25,6 +27,8 @@ export function AdvancedOptions({
   setWatermark,
   removeExif,
   setRemoveExif,
+  optimize,
+  setOptimize,
   batchPrefix,
   setBatchPrefix,
 }: AdvancedOptionsProps) {
@@ -39,39 +43,51 @@ export function AdvancedOptions({
           </div>
         </AccordionTrigger>
         <AccordionContent className="space-y-4 pt-2 pb-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-bold text-muted-foreground">
-              <Label>Brightness</Label>
-              <span>{enhancements.brightness}%</span>
-            </div>
-            <Slider
-              min={0} max={200} step={1}
-              value={[enhancements.brightness]}
-              onValueChange={([v]) => setEnhancements({ ...enhancements, brightness: v })}
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/20 border border-border/20 mb-2">
+            <Label className="text-xs font-bold text-foreground">Apply Enhancements</Label>
+            <Switch
+              checked={enhancements.enabled}
+              onCheckedChange={(v) => setEnhancements({ ...enhancements, enabled: v })}
             />
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-bold text-muted-foreground">
-              <Label>Contrast</Label>
-              <span>{enhancements.contrast}%</span>
+          
+          {enhancements.enabled && (
+            <div className="space-y-4 animate-pop-in">
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-bold text-muted-foreground">
+                  <Label>Brightness</Label>
+                  <span>{enhancements.brightness === 0 ? 'Normal' : (enhancements.brightness > 0 ? `+${enhancements.brightness}` : enhancements.brightness)}%</span>
+                </div>
+                <Slider
+                  min={-100} max={100} step={1}
+                  value={[enhancements.brightness]}
+                  onValueChange={([v]) => setEnhancements({ ...enhancements, brightness: v })}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-bold text-muted-foreground">
+                  <Label>Contrast</Label>
+                  <span>{enhancements.contrast === 0 ? 'Normal' : (enhancements.contrast > 0 ? `+${enhancements.contrast}` : enhancements.contrast)}%</span>
+                </div>
+                <Slider
+                  min={-100} max={100} step={1}
+                  value={[enhancements.contrast]}
+                  onValueChange={([v]) => setEnhancements({ ...enhancements, contrast: v })}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-bold text-muted-foreground">
+                  <Label>Saturation</Label>
+                  <span>{enhancements.saturation === 0 ? 'Normal' : (enhancements.saturation > 0 ? `+${enhancements.saturation}` : enhancements.saturation)}%</span>
+                </div>
+                <Slider
+                  min={-100} max={100} step={1}
+                  value={[enhancements.saturation]}
+                  onValueChange={([v]) => setEnhancements({ ...enhancements, saturation: v })}
+                />
+              </div>
             </div>
-            <Slider
-              min={0} max={200} step={1}
-              value={[enhancements.contrast]}
-              onValueChange={([v]) => setEnhancements({ ...enhancements, contrast: v })}
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs font-bold text-muted-foreground">
-              <Label>Saturation</Label>
-              <span>{enhancements.saturation}%</span>
-            </div>
-            <Slider
-              min={0} max={200} step={1}
-              value={[enhancements.saturation]}
-              onValueChange={([v]) => setEnhancements({ ...enhancements, saturation: v })}
-            />
-          </div>
+          )}
         </AccordionContent>
       </AccordionItem>
 
@@ -133,8 +149,8 @@ export function AdvancedOptions({
             Batch & Privacy
           </div>
         </AccordionTrigger>
-        <AccordionContent className="space-y-6 pt-2 pb-4">
-          <div className="space-y-2">
+        <AccordionContent className="space-y-4 pt-2 pb-4">
+          <div className="space-y-2 mb-4">
             <Label className="text-xs font-bold text-muted-foreground">Batch Name Prefix</Label>
             <Input
               value={batchPrefix}
@@ -156,6 +172,20 @@ export function AdvancedOptions({
             <Switch
               checked={removeExif}
               onCheckedChange={setRemoveExif}
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-card shadow-sm mt-2">
+            <div className="space-y-1">
+              <Label className="text-xs font-bold flex items-center gap-1.5 text-foreground">
+                <Sparkles className="h-3 w-3 text-primary" />
+                Smart Compression
+              </Label>
+              <p className="text-[10px] text-muted-foreground">Local TinyPNG-style optimization</p>
+            </div>
+            <Switch
+              checked={optimize}
+              onCheckedChange={setOptimize}
             />
           </div>
         </AccordionContent>

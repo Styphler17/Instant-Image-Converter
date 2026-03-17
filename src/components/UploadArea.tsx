@@ -1,6 +1,7 @@
-import { useRef, useState, useCallback } from "react";
-import { Upload, Image as ImageIcon } from "lucide-react";
+import { useRef, useState, useCallback, useEffect } from "react";
+import { Upload, Image as ImageIcon, FolderOpen, FileUp } from "lucide-react";
 import { ACCEPTED_INPUT_TYPES } from "@/lib/image-converter";
+import { Button } from "./ui/button";
 
 interface UploadAreaProps {
   onFiles: (files: File[]) => void;
@@ -9,14 +10,49 @@ interface UploadAreaProps {
 
 export function UploadArea({ onFiles, multiple = true }: UploadAreaProps) {
   const [dragActive, setDragActive] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper to recursively get files from a directory entry
+  const getFilesFromEntry = async (entry: any): Promise<File[]> => {
+    if (entry.isFile) {
+      return new Promise((resolve) => {
+        entry.file((file: File) => {
+          if (file.type.startsWith("image/") || ACCEPTED_INPUT_TYPES.split(",").some(ext => file.name.toLowerCase().endsWith(ext.trim().replace("*.", "")))) {
+            resolve([file]);
+          } else {
+            resolve([]);
+          }
+        });
+      });
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      const entries = await new Promise<any[]>((resolve) => {
+        reader.readEntries(resolve);
+      });
+      const files = await Promise.all(entries.map(getFilesFromEntry));
+      return files.flat();
+    }
+    return [];
+  };
 
   const handleDrop = useCallback(
-    (e: React.DragEvent) => {
+    async (e: React.DragEvent) => {
       e.preventDefault();
       setDragActive(false);
-      const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
-      if (files.length) onFiles(multiple ? files : [files[0]]);
+
+      const items = Array.from(e.dataTransfer.items);
+      if (items.length > 0) {
+        const filePromises = items.map((item) => {
+          const entry = item.webkitGetAsEntry();
+          return entry ? getFilesFromEntry(entry) : [];
+        });
+
+        const allFiles = (await Promise.all(filePromises)).flat();
+        if (allFiles.length) {
+          onFiles(multiple ? allFiles : [allFiles[0]]);
+        }
+      }
     },
     [onFiles, multiple]
   );
@@ -28,85 +64,136 @@ export function UploadArea({ onFiles, multiple = true }: UploadAreaProps) {
     else if (e.type === "dragleave") setDragActive(false);
   }, []);
 
-  const handleChange = useCallback(
+  const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length) onFiles(multiple ? files : [files[0]]);
-      // Reset input so re-selecting same file triggers change
-      if (inputRef.current) inputRef.current.value = "";
+      const selectedFiles = Array.from(e.target.files || []);
+      const imageFiles = selectedFiles.filter(f => f.type.startsWith("image/") || true); // Trust the input accept filter mostly
+      if (imageFiles.length) onFiles(multiple ? imageFiles : [imageFiles[0]]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     },
     [onFiles, multiple]
   );
 
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      aria-label="Upload image files"
-      onDragEnter={handleDrag}
-      onDragLeave={handleDrag}
-      onDragOver={handleDrag}
-      onDrop={handleDrop}
-      onClick={() => inputRef.current?.click()}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          inputRef.current?.click();
-        }
-      }}
-      className={`
-        group relative flex cursor-pointer flex-col items-center justify-center gap-6 
-        rounded-2xl border-2 border-dashed p-10 sm:p-16 transition-all duration-300
-        ${dragActive
-          ? "border-primary bg-primary/10 scale-[0.99] shadow-inner"
-          : "glass border-border/60 hover:border-primary/40 hover:bg-muted/30 hover:shadow-lg"
-        }
-      `}
-    >
-      <div className="relative">
-        <div className="absolute -inset-4 rounded-full bg-primary/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className={`
-          relative flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 
-          transition-all duration-500 group-hover:scale-110 group-hover:bg-primary/20 group-hover:rotate-3
-          ${dragActive ? "scale-90 rotate-0" : ""}
-        `}>
-          {dragActive ? (
-            <Upload className="h-10 w-10 text-primary animate-bounce" />
-          ) : (
-            <ImageIcon className="h-10 w-10 text-primary transition-transform group-hover:scale-110" />
-          )}
-        </div>
-      </div>
+  // Set webkitdirectory for folder input
+  useEffect(() => {
+    if (folderInputRef.current) {
+      folderInputRef.current.setAttribute("webkitdirectory", "");
+      folderInputRef.current.setAttribute("directory", "");
+    }
+  }, []);
 
-      <div className="text-center relative z-10">
-        <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {dragActive ? "Release to start" : "Drop images here"}
-        </h3>
-        <p className="mt-2 text-sm font-medium text-muted-foreground">
-          or <span className="text-primary underline-offset-4 group-hover:underline">browse files</span> on your device
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-           {['JPG', 'PNG', 'WebP', 'AVIF'].map(fmt => (
-             <span key={fmt} className="px-2 py-1 rounded-md bg-muted text-[10px] font-bold tracking-wider">{fmt}</span>
+  return (
+    <div className="space-y-4">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Upload image files or folders"
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        onClick={(e) => {
+          // Only trigger if clicking the area directly, not buttons
+          if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.drop-text')) {
+             fileInputRef.current?.click();
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        className={`
+          group relative flex cursor-pointer flex-col items-center justify-center gap-6 
+          rounded-[50px] border-2 border-dashed p-10 sm:p-16 transition-all duration-500
+          ${dragActive
+            ? "border-primary bg-primary/10 scale-[0.98] shadow-2xl"
+            : "glass border-border/40 hover:border-primary/40 hover:bg-muted/30 hover:shadow-xl"
+          }
+        `}
+      >
+        <div className="relative">
+          <div className="absolute -inset-6 rounded-full bg-primary/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className={`
+            relative flex h-24 w-24 items-center justify-center rounded-[32px] bg-primary/10 
+            transition-all duration-700 group-hover:scale-110 group-hover:bg-primary/20 group-hover:rotate-6
+            ${dragActive ? "scale-90 rotate-0" : ""}
+          `}>
+            {dragActive ? (
+              <Upload className="h-12 w-12 text-primary animate-bounce" />
+            ) : (
+              <ImageIcon className="h-12 w-12 text-primary transition-transform group-hover:scale-110" />
+            )}
+          </div>
+        </div>
+
+        <div className="text-center relative z-10 drop-text">
+          <h3 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+            {dragActive ? "Release to start" : "Drop your workspace"}
+          </h3>
+          <p className="mt-3 text-sm font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+            Files or entire folders
+          </p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-3 relative z-10">
+          <Button 
+            variant="secondary" 
+            size="lg" 
+            onClick={(e) => {
+              e.stopPropagation();
+              fileInputRef.current?.click();
+            }}
+            className="rounded-full gap-2 font-bold px-8 shadow-md hover:shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <FileUp className="h-4 w-4" />
+            Select Files
+          </Button>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={(e) => {
+              e.stopPropagation();
+              folderInputRef.current?.click();
+            }}
+            className="rounded-full gap-2 font-bold px-8 border-border/60 glass hover:bg-muted/50 transition-all hover:scale-105 active:scale-95"
+          >
+            <FolderOpen className="h-4 w-4" />
+            Upload Folder
+          </Button>
+        </div>
+
+        <div className="mt-4 flex flex-wrap justify-center gap-2 opacity-40 group-hover:opacity-80 transition-opacity duration-500">
+           {['HEIC', 'WEBP', 'AVIF', 'PNG', 'JPG'].map(fmt => (
+             <span key={fmt} className="px-3 py-1 rounded-full bg-muted text-[10px] font-black tracking-widest">{fmt}</span>
            ))}
         </div>
-      </div>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
-           Maximum quality · 30MB limit
-        </p>
-      </div>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+             Privacy First · Zero Server Uploads
+          </p>
+        </div>
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPTED_INPUT_TYPES}
-        onChange={handleChange}
-        className="sr-only"
-        aria-hidden="true"
-        multiple={multiple}
-      />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ACCEPTED_INPUT_TYPES}
+          onChange={handleFileChange}
+          className="sr-only"
+          aria-hidden="true"
+          multiple={multiple}
+        />
+        <input
+          ref={folderInputRef}
+          type="file"
+          onChange={handleFileChange}
+          className="sr-only"
+          aria-hidden="true"
+          multiple={multiple}
+        />
+      </div>
     </div>
   );
 }

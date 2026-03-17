@@ -18,6 +18,8 @@ import { useEffect, useState } from "react";
 import { Shield, Download, FileArchive, FileText, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import { ActionButton } from "@/components/ui/action-button";
+
 const Index = () => {
   const {
     state,
@@ -39,6 +41,8 @@ const Index = () => {
     setWatermark,
     removeExif,
     setRemoveExif,
+    optimize,
+    setOptimize,
     batchPrefix,
     setBatchPrefix,
     handleFiles,
@@ -61,7 +65,7 @@ const Index = () => {
     if (error) toast.error(error);
   }, [error]);
 
-  const isIdle = state === "idle";
+  const isIdle = state === "idle" || state === "loading";
 
   const handleDownloadAll = () => {
     items.forEach((item, index) => {
@@ -106,7 +110,10 @@ const Index = () => {
 
   return (
     <AppShell>
-      <ProgressOverlay visible={state === "converting"} />
+      <ProgressOverlay 
+        visible={state === "converting" || state === "loading"} 
+        message={state === "loading" ? "Analyzing Images..." : "Optimizing Batch..."}
+      />
 
       <div className="container max-w-6xl py-12 sm:py-20">
         {isIdle ? (
@@ -114,15 +121,15 @@ const Index = () => {
             <div className="text-center space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold uppercase tracking-widest text-primary mb-2">
                 <Sparkles className="h-3 w-3" />
-                Unlimited Batch · No Uploads · 100% Secure
+                <span className="keyword-blue">Unlimited Batch</span> · <span className="keyword-green">No Uploads</span> · <span className="keyword-purple">100% Secure</span>
               </div>
               <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-7xl leading-tight">
                 <span className="text-gradient">Unlimited Image Converter</span>
                 <br />
-                <span className="opacity-80">No Uploads. No Fees.</span>
+                <span className="opacity-80"><span className="keyword-green">No Uploads</span>. <span className="keyword-orange">No Fees</span>.</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
-                The fastest way to convert HEIC, PNG, JPG, WebP, and AVIF. Everything stays in your browser for total privacy and instant local speed.
+                The fastest way to convert <span className="keyword-blue">HEIC</span>, <span className="keyword-primary">PNG</span>, <span className="keyword-orange">JPG</span>, <span className="keyword-green">WebP</span>, and <span className="keyword-purple">AVIF</span>. Everything stays in your browser for <span className="keyword-primary">total privacy</span> and <span className="keyword-blue">instant local speed</span>.
               </p>
               <div className="pt-2">
                 <a 
@@ -208,6 +215,8 @@ const Index = () => {
                         setWatermark={setWatermark}
                         removeExif={removeExif}
                         setRemoveExif={setRemoveExif}
+                        optimize={optimize}
+                        setOptimize={setOptimize}
                         batchPrefix={batchPrefix}
                         setBatchPrefix={setBatchPrefix}
                       />
@@ -232,34 +241,37 @@ const Index = () => {
                            <Shield className="h-4 w-4 text-primary" />
                            <h4 className="text-sm font-bold text-foreground">Pro Export Options</h4>
                         </div>
-                        <Button
+                        <ActionButton
                           onClick={handleDownloadAll}
                           variant="default"
                           size="lg"
-                          className="gap-2 w-full premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base font-bold"
+                          showAnimation
+                          className="gap-2 w-full premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base font-bold rounded-full"
                         >
                           <Download className="h-5 w-5" />
                           Download Individual Files
-                        </Button>
+                        </ActionButton>
                         <div className="grid grid-cols-2 gap-2">
-                          <Button
+                          <ActionButton
                             onClick={handleZip}
                             disabled={isZipping}
                             variant="outline"
-                            className="gap-2 border-border/60 hover:bg-muted/50 h-12 font-bold"
+                            showAnimation
+                            className="gap-2 border-border/60 hover:bg-muted/50 h-12 font-bold w-full rounded-full"
                           >
                             {isZipping ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileArchive className="h-4 w-4 text-blue-500" />}
                             ZIP Archive
-                          </Button>
-                          <Button
+                          </ActionButton>
+                          <ActionButton
                             onClick={handlePDF}
                             disabled={isPdfing}
                             variant="outline"
-                            className="gap-2 border-border/60 hover:bg-muted/50 h-12 font-bold"
+                            showAnimation
+                            className="gap-2 border-border/60 hover:bg-muted/50 h-12 font-bold w-full rounded-full"
                           >
                             {isPdfing ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4 text-red-500" />}
                             PDF Document
-                          </Button>
+                          </ActionButton>
                         </div>
                       </div>
                     )}

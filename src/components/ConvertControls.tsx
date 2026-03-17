@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "./ui/action-button";
+import { Button } from "./ui/button";
 import { RefreshCw, Download, Loader2, ImagePlus } from "lucide-react";
 import { type ConversionResult, getOutputFilename } from "@/lib/image-converter";
 import { type ConversionState } from "@/hooks/useImageConversion";
@@ -32,21 +33,22 @@ export function ConvertControls({
     <div className="flex flex-col gap-3 w-full">
       {state === "done" && result ? (
         <div className="flex flex-col gap-3">
-          <Button
+          <ActionButton
             onClick={handleDownload}
             size="lg"
-            className="w-full gap-2 font-bold premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base animate-pop-in"
+            showAnimation
+            className="w-full gap-2 font-bold premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base animate-pop-in rounded-full"
           >
             <Download className="h-5 w-5" />
             Download Result
-          </Button>
+          </ActionButton>
           
           <div className="flex gap-2">
             <Button
               onClick={onConvert}
               variant="outline"
               size="lg"
-              className="flex-1 gap-2 border-border/60 hover:bg-muted/50 transition-colors"
+              className="flex-1 gap-2 border-border/60 hover:bg-muted/50 transition-colors rounded-full"
             >
               <RefreshCw className="h-4 w-4" />
               Re-convert
@@ -55,7 +57,7 @@ export function ConvertControls({
               onClick={onReset}
               variant="ghost"
               size="lg"
-              className="flex-1 gap-2 hover:bg-destructive/10 hover:text-destructive transition-colors"
+              className="flex-1 gap-2 hover:bg-destructive/10 hover:text-destructive transition-colors rounded-full"
             >
               <ImagePlus className="h-4 w-4" />
               Reset All
@@ -64,11 +66,12 @@ export function ConvertControls({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          <Button
+          <ActionButton
             onClick={onConvert}
             size="lg"
+            showAnimation
             disabled={state === "converting" || state === "loading"}
-            className="w-full gap-2 font-bold premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base disabled:opacity-50 disabled:scale-100"
+            className="w-full gap-2 font-bold premium-gradient shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all py-6 text-base disabled:opacity-50 disabled:scale-100 rounded-full"
           >
             {state === "converting" ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -76,12 +79,12 @@ export function ConvertControls({
               <RefreshCw className="h-5 w-5" />
             )}
             {state === "converting" ? "Converting..." : "Start Conversion"}
-          </Button>
+          </ActionButton>
           <Button
             onClick={onReset}
             variant="ghost"
             size="lg"
-            className="w-full gap-2 hover:bg-muted/50 transition-colors"
+            className="w-full gap-2 hover:bg-muted/50 transition-colors rounded-full"
           >
             <ImagePlus className="h-4 w-4" />
             Add Different Image

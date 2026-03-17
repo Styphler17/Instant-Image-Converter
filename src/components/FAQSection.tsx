@@ -1,6 +1,16 @@
 import { HelpCircle } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const faqs = [
+  {
+    q: "Does JPG to PNG increase file size?",
+    a: "Yes, usually **2–10x larger** for photos. This happens because JPG is **lossy** (compresses by discarding detail), while PNG is **lossless** (stores every pixel exactly). Converting won't improve quality, but it's required for **transparency**."
+  },
   {
     q: "Is this image converter really free?",
     a: "Yes, **100% free forever**—no ads, no signups, no limits. Unlike FreeConvert (10 files/day) or Online-Convert (ads everywhere), convert unlimited batches instantly."
@@ -81,21 +91,30 @@ export function FAQSection() {
         <p className="text-muted-foreground font-medium max-w-lg">Transparent answers about privacy, speed, and limits.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 max-w-5xl mx-auto px-4">
-        {faqs.map((faq, i) => (
-          <div key={i} className="space-y-3 group">
-            <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
-              {faq.q}
-            </h3>
-            <p 
-              className="text-sm text-muted-foreground leading-relaxed font-medium"
-              dangerouslySetInnerHTML={{ 
-                __html: faq.a
-                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-bold">$1</strong>')
-              }}
-            />
-          </div>
-        ))}
+      <div className="max-w-3xl mx-auto px-4">
+        <Accordion type="single" collapsible className="w-full space-y-4">
+          {faqs.map((faq, i) => (
+            <AccordionItem 
+              key={i} 
+              value={`item-${i}`}
+              className="glass-card rounded-2xl px-6 border-none overflow-hidden"
+            >
+              <AccordionTrigger className="text-base font-bold text-foreground hover:text-primary transition-colors hover:no-underline py-6">
+                {faq.q}
+              </AccordionTrigger>
+              <AccordionContent 
+                className="text-sm text-muted-foreground leading-relaxed font-medium"
+              >
+                <div 
+                  dangerouslySetInnerHTML={{ 
+                    __html: faq.a
+                      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-bold">$1</strong>')
+                  }}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );

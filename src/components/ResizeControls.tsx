@@ -3,11 +3,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Lock, Unlock, Maximize2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Lock, Unlock, Maximize2, Monitor, Instagram, Share2, Printer, Globe, Zap } from "lucide-react";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -19,8 +22,34 @@ interface ResizeControlsProps {
   originalHeight: number;
 }
 
+const PRESETS = [
+  { group: "Social Media", items: [
+    { label: "Instagram Post", width: 1080, height: 1080, icon: Instagram },
+    { label: "Instagram Story", width: 1080, height: 1920, icon: Instagram },
+    { label: "Facebook Cover", width: 820, height: 312, icon: Share2 },
+    { label: "YouTube Thumbnail", width: 1280, height: 720, icon: Share2 },
+    { label: "Twitter Header", width: 1500, height: 500, icon: Share2 },
+  ]},
+  { group: "Web & Apps", items: [
+    { label: "Full HD (1080p)", width: 1920, height: 1080, icon: Monitor },
+    { label: "HD (720p)", width: 1280, height: 720, icon: Monitor },
+    { label: "OG Image (OpenGraph)", width: 1200, height: 630, icon: Globe },
+    { label: "Favicon", width: 32, height: 32, icon: Globe },
+  ]},
+  { group: "Print (300 DPI approx)", items: [
+    { label: "A4 Document", width: 2480, height: 3508, icon: Printer },
+    { label: "A5 Document", width: 1748, height: 2480, icon: Printer },
+    { label: "Business Card", width: 1050, height: 600, icon: Printer },
+  ]}
+];
+
 export function ResizeControls({ resize, onChange, originalWidth, originalHeight }: ResizeControlsProps) {
   const aspectRatio = originalWidth / originalHeight;
+
+  const isUpscaling = 
+    (resize.mode === "percentage" && resize.percentage > 100) ||
+    (resize.mode === "dimensions" && (resize.width > originalWidth || resize.height > originalHeight)) ||
+    (resize.mode === "preset");
 
   const handleModeChange = (mode: ResizeMode) => {
     onChange({
@@ -30,6 +59,23 @@ export function ResizeControls({ resize, onChange, originalWidth, originalHeight
       height: originalHeight,
       percentage: 100,
     });
+  };
+
+  const handlePresetSelect = (val: string) => {
+    // Find preset by label
+    for (const group of PRESETS) {
+      const preset = group.items.find(item => item.label === val);
+      if (preset) {
+        onChange({
+          ...resize,
+          mode: "dimensions",
+          width: preset.width,
+          height: preset.height,
+          lockAspectRatio: false, // Presets usually have fixed aspect ratios
+        });
+        break;
+      }
+    }
   };
 
   const handleWidthChange = (w: number) => {
@@ -63,15 +109,53 @@ export function ResizeControls({ resize, onChange, originalWidth, originalHeight
       </div>
 
       <Select value={resize.mode} onValueChange={(v) => handleModeChange(v as ResizeMode)}>
-        <SelectTrigger className="w-full bg-background/50 border-border/60 h-11 focus:ring-primary/20 transition-all">
+        <SelectTrigger className="w-full bg-background/50 border-border/60 h-11 focus:ring-primary/20 transition-all rounded-full">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="glass border-border/60">
+        <SelectContent className="glass border-border/60 rounded-2xl">
           <SelectItem value="none" className="focus:bg-primary/10">Original Dimensions</SelectItem>
           <SelectItem value="percentage" className="focus:bg-primary/10">Scale by Percentage</SelectItem>
           <SelectItem value="dimensions" className="focus:bg-primary/10">Custom Pixel Size</SelectItem>
+          <SelectItem value="preset" className="focus:bg-primary/10">Standard Presets</SelectItem>
         </SelectContent>
       </Select>
+
+      {resize.mode === "preset" && (
+        <div className="space-y-4 pt-2 animate-pop-in">
+          <Select onValueChange={handlePresetSelect}>
+            <SelectTrigger className="w-full bg-background/50 border-border/60 h-11 focus:ring-primary/20 transition-all rounded-full">
+              <SelectValue placeholder="Choose a preset..." />
+            </SelectTrigger>
+            <SelectContent className="glass border-border/60 rounded-2xl max-h-80">
+              {PRESETS.map((group) => (
+                <SelectGroup key={group.group}>
+                  <SelectLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2 py-1.5">
+                    {group.group}
+                  </SelectLabel>
+                  {group.items.map((item) => (
+                    <SelectItem key={item.label} value={item.label} className="focus:bg-primary/10">
+                      <div className="flex items-center gap-2">
+                        <item.icon className="h-3.5 w-3.5 opacity-60" />
+                        <span>{item.label}</span>
+                        <span className="text-[10px] text-muted-foreground ml-auto opacity-60">
+                          {item.width}×{item.height}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <div className="rounded-xl bg-muted/30 border border-border/40 p-3 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Active Preset Dimensions</p>
+            <p className="text-sm font-bold mt-1 tabular-nums">
+              {resize.width} × {resize.height} <span className="text-[10px] text-muted-foreground">PX</span>
+            </p>
+          </div>
+        </div>
+      )}
 
       {resize.mode === "percentage" && (
         <div className="space-y-4 pt-2 animate-pop-in">
@@ -116,9 +200,9 @@ export function ResizeControls({ resize, onChange, originalWidth, originalHeight
                   max={16384}
                   value={resize.width || ""}
                   onChange={(e) => handleWidthChange(Number(e.target.value) || 1)}
-                  className="bg-background/50 border-border/60 h-11 focus:ring-primary/20 pr-8 transition-all"
+                  className="bg-background/50 border-border/60 h-11 focus:ring-primary/20 pr-8 transition-all rounded-full"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground/40 pointer-events-none group-focus-within:text-primary/40 transition-colors">PX</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground/40 pointer-events-none group-focus-within:text-primary/40 transition-colors">PX</span>
               </div>
             </div>
 
@@ -150,11 +234,32 @@ export function ResizeControls({ resize, onChange, originalWidth, originalHeight
                   max={16384}
                   value={resize.height || ""}
                   onChange={(e) => handleHeightChange(Number(e.target.value) || 1)}
-                  className="bg-background/50 border-border/60 h-11 focus:ring-primary/20 pr-8 transition-all"
+                  className="bg-background/50 border-border/60 h-11 focus:ring-primary/20 pr-8 transition-all rounded-full"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground/40 pointer-events-none group-focus-within:text-primary/40 transition-colors">PX</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground/40 pointer-events-none group-focus-within:text-primary/40 transition-colors">PX</span>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isUpscaling && (
+        <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-500">
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-primary/5 border border-primary/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Zap className="h-4 w-4 text-primary" />
+              </div>
+              <div className="space-y-0.5">
+                <Label htmlFor="upscale-mode" className="text-xs font-bold block cursor-pointer">Smart AI Upscale</Label>
+                <p className="text-[10px] text-muted-foreground font-medium">Bilinear smoothing & detail preservation</p>
+              </div>
+            </div>
+            <Switch 
+              id="upscale-mode" 
+              checked={resize.upscale} 
+              onCheckedChange={(v) => onChange({ ...resize, upscale: v })}
+            />
           </div>
         </div>
       )}

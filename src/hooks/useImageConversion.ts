@@ -36,6 +36,7 @@ export function useImageConversion() {
   const [enhancements, setEnhancements] = useState<EnhancementOptions>(DEFAULT_ENHANCEMENT_OPTIONS);
   const [watermark, setWatermark] = useState<WatermarkOptions>(DEFAULT_WATERMARK_OPTIONS);
   const [removeExif, setRemoveExif] = useState(true);
+  const [optimize, setOptimize] = useState(true);
   const [batchPrefix, setBatchPrefix] = useState("");
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -104,7 +105,8 @@ export function useImageConversion() {
       resize,
       enhancements,
       watermark,
-      removeExif 
+      removeExif,
+      optimize
     };
     const updated = [...items];
 
@@ -130,7 +132,7 @@ export function useImageConversion() {
 
     const allDone = updated.every((item) => item.state === "done" || item.state === "error");
     setGlobalState(allDone ? "done" : "error");
-  }, [items, outputFormat, quality, resize, enhancements, watermark, removeExif, cleanupUrls]);
+  }, [items, outputFormat, quality, resize, enhancements, watermark, removeExif, optimize, cleanupUrls]);
 
   const reset = useCallback(() => {
     items.forEach((item) => {
@@ -144,6 +146,7 @@ export function useImageConversion() {
     setResize(DEFAULT_RESIZE_OPTIONS);
     setEnhancements(DEFAULT_ENHANCEMENT_OPTIONS);
     setWatermark(DEFAULT_WATERMARK_OPTIONS);
+    setOptimize(true);
     setBatchPrefix("");
   }, [items, cleanupUrls]);
 
@@ -171,6 +174,8 @@ export function useImageConversion() {
     setWatermark,
     removeExif,
     setRemoveExif,
+    optimize,
+    setOptimize,
     batchPrefix,
     setBatchPrefix,
     handleFiles,

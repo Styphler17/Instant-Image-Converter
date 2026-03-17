@@ -3,42 +3,42 @@ import { Shield, Zap, Infinity, Lock, Smartphone, Heart } from "lucide-react";
 const features = [
   {
     title: "100% Private",
-    description: "Your images never leave your device. All processing happens locally in your browser.",
+    description: "Your images <span class=\"keyword-primary\">never leave your device</span>. All processing happens <span class=\"keyword-green\">locally in your browser</span>.",
     icon: Shield,
     color: "text-green-500",
     bg: "bg-green-500/10",
   },
   {
     title: "No Limits",
-    description: "Convert unlimited files in one batch. No daily caps, no hidden fees, and no file size restrictions.",
+    description: "Convert <span class=\"keyword-blue\">unlimited files</span> in one batch. <span class=\"keyword-orange\">No daily caps</span>, <span class=\"keyword-green\">no hidden fees</span>, and no file size restrictions.",
     icon: Infinity,
     color: "text-primary",
     bg: "bg-primary/10",
   },
   {
     title: "Instant Speed",
-    description: "Bypass server queues. Local processing is up to 10x faster than cloud-based alternatives.",
+    description: "Bypass server queues. Local processing is <span class=\"keyword-blue\">up to 10x faster</span> than cloud-based alternatives.",
     icon: Zap,
     color: "text-yellow-500",
     bg: "bg-yellow-500/10",
   },
   {
     title: "No Accounts",
-    description: "No signups, no emails, and absolutely no ads. Just open and convert instantly.",
+    description: "<span class=\"keyword-orange\">No signups</span>, <span class=\"keyword-purple\">no emails</span>, and <span class=\"keyword-green\">absolutely no ads</span>. Just open and convert instantly.",
     icon: Lock,
     color: "text-purple-500",
     bg: "bg-purple-500/10",
   },
   {
     title: "PWA Ready",
-    description: "Install as an app on your phone or desktop for offline access and native experience.",
+    description: "<span class=\"keyword-blue\">Install as an app</span> on your phone or desktop for <span class=\"keyword-primary\">offline access</span> and native experience.",
     icon: Smartphone,
     color: "text-blue-500",
     bg: "bg-blue-500/10",
   },
   {
     title: "Free Forever",
-    description: "Professional tools without the price tag. Supported by voluntary donations only.",
+    description: "Professional tools <span class=\"keyword-green\">without the price tag</span>. Supported by voluntary donations only.",
     icon: Heart,
     color: "text-red-500",
     bg: "bg-red-500/10",
@@ -55,8 +55,7 @@ export function FeaturesGrid() {
           </div>
           <div className="space-y-2">
             <h3 className="font-bold text-base">{feature.title}</h3>
-            <p className="text-xs leading-relaxed text-muted-foreground font-medium">
-              {feature.description}
+            <p className="text-xs leading-relaxed text-muted-foreground font-medium" dangerouslySetInnerHTML={{ __html: feature.description }}>
             </p>
           </div>
         </div>

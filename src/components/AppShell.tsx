@@ -1,7 +1,8 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { usePWAInstallPrompt } from "@/hooks/usePWAInstallPrompt";
-import { Download, X, Share, Coffee, Heart, CreditCard, Cloud, ExternalLink, Sparkles } from "lucide-react";
+import { Download, X, Share, Coffee, Heart, CreditCard, Cloud, ExternalLink, Sparkles, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface AppShellProps {
   children: ReactNode;
@@ -9,6 +10,20 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const { showBanner, isIOS, promptInstall, dismiss } = usePWAInstallPrompt();
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background selection:bg-primary/30">
@@ -32,7 +47,7 @@ export function AppShell({ children }: AppShellProps) {
                 variant="secondary"
                 size="sm"
                 onClick={promptInstall}
-                className="h-7 text-xs font-bold px-3 shadow-sm hover:shadow-md active:scale-95 transition-all"
+                className="h-7 text-xs font-bold px-3 shadow-sm hover:shadow-md active:scale-95 transition-all rounded-full"
               >
                 Install
               </Button>
@@ -67,7 +82,7 @@ export function AppShell({ children }: AppShellProps) {
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Theme toggle could go here */}
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -80,6 +95,19 @@ export function AppShell({ children }: AppShellProps) {
         </div>
         {children}
       </main>
+
+      {/* Back to top button */}
+      <Button
+        variant="secondary"
+        size="icon"
+        onClick={scrollToTop}
+        className={`fixed bottom-8 right-8 z-50 rounded-full h-12 w-12 shadow-lg transition-all duration-300 glass border-border/40 ${
+          showBackToTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
+        }`}
+        aria-label="Back to top"
+      >
+        <ArrowUp className="h-6 w-6" />
+      </Button>
 
       {/* Footer */}
       <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm px-4 py-16 text-center">

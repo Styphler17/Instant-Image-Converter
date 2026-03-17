@@ -37,7 +37,7 @@
     --input: 214 32% 91%;
     --ring: 221 83% 53%;
 
-    --radius: 1rem;
+    --radius: 50px;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -127,5 +127,53 @@
 
   .dropzone-active {
     @apply border-primary bg-primary/10 scale-[0.99] shadow-inner;
+  }
+
+  .keyword-blue {
+    @apply text-blue-500 font-bold dark:text-blue-400;
+  }
+
+  .keyword-green {
+    @apply text-emerald-500 font-bold dark:text-emerald-400;
+  }
+
+  .keyword-purple {
+    @apply text-purple-500 font-bold dark:text-purple-400;
+  }
+
+  .keyword-orange {
+    @apply text-orange-500 font-bold dark:text-orange-400;
+  }
+
+  .keyword-primary {
+    @apply text-primary font-bold;
+  }
+
+  @keyframes radiation {
+    0% {
+      transform: scale(0.5);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  .animate-radiation {
+    animation: radiation 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  }
+
+  @keyframes scanline {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(1000%);
+    }
+  }
+
+  .animate-scanline {
+    animation: scanline 3s linear infinite;
   }
 }

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { type ImageInfo, type ConversionResult, formatBytes, formatName } from "@/lib/image-converter";
-import { ArrowRight, TrendingDown, TrendingUp, Clock, SlidersHorizontal, LayoutGrid, Palette } from "lucide-react";
+import { ArrowRight, TrendingDown, TrendingUp, Clock, SlidersHorizontal, LayoutGrid, Palette, AlertCircle, Share2 } from "lucide-react";
 import { ComparisonSlider } from "@/components/ComparisonSlider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { extractColors, type ColorPalette } from "@/lib/color-utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 interface PreviewPaneProps {
   imageInfo: ImageInfo;
@@ -19,17 +21,73 @@ export function PreviewPane({ imageInfo, result }: PreviewPaneProps) {
     ? ((result.convertedSize - result.originalSize) / result.originalSize) * 100
     : null;
 
+  const isJpgToPng = imageInfo.format.toLowerCase().includes("jpeg") && result?.format === "image/png";
+  const isSizeSignificantIncrease = sizeChange !== null && sizeChange > 50;
+
   useEffect(() => {
     extractColors(imageInfo.url)
       .then(setColors)
       .catch(() => setColors(null));
   }, [imageInfo.url]);
 
+  const handleShare = async () => {
+    if (!result) return;
+    
+    const reduction = sizeChange && sizeChange < 0 ? Math.abs(sizeChange).toFixed(1) : 0;
+    const text = reduction 
+      ? `I just saved ${reduction}% in file size using Instant Image Converter! 🚀 100% private, browser-based conversion.`
+      : `I just converted my images to ${formatName(result.format)} instantly using Instant Image Converter! 🖼️`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Instant Image Converter',
+          text: text,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(`${text} ${window.location.href}`);
+        toast.success("Summary copied to clipboard!");
+      }
+    } catch (e) {
+      // User cancelled
+    }
+  };
+
+  const renderSizeWarning = () => {
+    if (!result || !isSizeSignificantIncrease) return null;
+
+    return (
+      <Alert variant="destructive" className="bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400 animate-in fade-in slide-in-from-top-2 duration-500 rounded-2xl">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle className="text-xs font-bold uppercase tracking-wider mb-1">
+          {isJpgToPng ? "JPG to PNG Size Warning" : "File Size Notice"}
+        </AlertTitle>
+        <AlertDescription className="text-[11px] leading-relaxed font-medium">
+          {isJpgToPng ? (
+            <>
+              PNG is <span className="font-bold underline decoration-orange-500/30">lossless</span> and stores every pixel exactly, making photos <span className="font-bold text-red-500">2–10x larger</span> than JPG. 
+              Use PNG only for transparency. For small files, try <span className="font-bold text-emerald-500 underline decoration-emerald-500/30">WebP</span> instead.
+            </>
+          ) : (
+            <>
+              Converting from lossy formats to lossless formats or applying enhancements can significantly increase file size. 
+              For smaller files with similar quality, try using <span className="font-bold text-emerald-500">WebP</span> or <span className="font-bold text-emerald-500">AVIF</span> instead.
+            </>
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  };
+
   return (
     <div className="space-y-6">
+      {/* File Size Warning */}
+      {renderSizeWarning()}
+
       {/* View mode toggle when result is available */}
       {result && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/50 border border-border/40">
             <Button
               variant={viewMode === "sideBySide" ? "secondary" : "ghost"}
@@ -51,9 +109,20 @@ export function PreviewPane({ imageInfo, result }: PreviewPaneProps) {
             </Button>
           </div>
           
-          <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-background/50 px-2 py-1 rounded-md border border-border/40">
-            <Clock className="h-3 w-3" />
-            <span>Process: {result.conversionTimeMs.toFixed(0)}ms</span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="gap-1.5 text-[10px] font-bold uppercase tracking-wider h-8 rounded-lg border-border/60 hover:bg-primary/5 transition-all"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              Share Stats
+            </Button>
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-background/50 px-2 py-1 rounded-md border border-border/40 h-8">
+              <Clock className="h-3 w-3" />
+              <span>{result.conversionTimeMs.toFixed(0)}ms</span>
+            </div>
           </div>
         </div>
       )}
@@ -72,7 +141,12 @@ export function PreviewPane({ imageInfo, result }: PreviewPaneProps) {
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Original Source</p>
-               <span className="text-[10px] font-bold text-primary/60">{imageInfo.width}×{imageInfo.height}</span>
+               <div className="flex items-center gap-2">
+                 <span className="px-1.5 py-0.5 rounded bg-muted text-[9px] font-black text-muted-foreground border border-border/40 uppercase">
+                   {(imageInfo.file as any).originalFormatLabel ? `${(imageInfo.file as any).originalFormatLabel} SOURCE` : formatName(imageInfo.format)}
+                 </span>
+                 <span className="text-[10px] font-bold text-primary/60">{imageInfo.width}×{imageInfo.height}</span>
+               </div>
             </div>
             <div className="relative group overflow-hidden rounded-2xl border border-border/60 bg-muted/20 shadow-inner">
               <img
